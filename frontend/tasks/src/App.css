@@ -1,0 +1,12 @@
+  @import "tailwindcss";
+
+  #root {
+
+    margin: 0;
+    padding: 50px;
+    box-sizing: border-box;
+    font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+    
+  }
+
+  
