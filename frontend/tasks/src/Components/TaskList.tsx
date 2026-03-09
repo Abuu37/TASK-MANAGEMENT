@@ -70,34 +70,34 @@ function TaskList() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6 relative">
-      <div className="bg-white max-w-7xl mx-auto p-10 rounded-3xl shadow-xl">
-        <h2 className="text-4xl font-bold text-center mb-8 text-blue-600">
-          📋 Task List
+    <div className="min-h-screen bg-gray-100 p-6">
+      <div className="bg-white max-w-6xl mx-auto p-8 rounded shadow">
+        <h2 className="text-3xl font-bold text-center mb-6 text-blue-600">
+          Task List
         </h2>
 
         {/* VIEW CARD */}
         {viewTask && (
-          <div className="fixed inset-0 flex justify-center items-center z-50 pointer-events-none">
-            <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md pointer-events-auto animate-fadeIn relative">
+          <div className="fixed inset-0 flex justify-center items-center z-50 bg-black bg-opacity-50">
+            <div className="bg-white p-6 rounded shadow-lg w-full max-w-md">
               <button
                 onClick={() => setViewTask(null)}
-                className="absolute top-3 right-3 text-gray-500 hover:text-red-500 text-xl font-bold"
+                className="float-right text-gray-500 hover:text-red-500 text-xl font-bold"
               >
-                ✕
+                ×
               </button>
 
-              <h3 className="text-2xl font-bold mb-4 text-blue-600">
+              <h3 className="text-xl font-bold mb-4 text-blue-600">
                 {viewTask.title}
               </h3>
 
-              <p className="mb-3 text-lg">
+              <p className="mb-2">
                 <b>Description:</b> {viewTask.description}
               </p>
 
-              <p className="mb-4 text-lg">
+              <p className="mb-2">
                 <b>Status:</b>{" "}
-                <span className={`px-3 py-1 rounded-full ${getStatusColor(viewTask.status)}`}>
+                <span className={`px-2 py-1 rounded ${getStatusColor(viewTask.status)}`}>
                   {viewTask.status}
                 </span>
               </p>
@@ -107,18 +107,18 @@ function TaskList() {
 
         {/* EDIT CARD */}
         {editTask && (
-          <div className="fixed inset-0 flex justify-center items-center z-50">
-            <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md relative animate-fadeIn">
+          <div className="fixed inset-0 flex justify-center items-center z-50 bg-black bg-opacity-50">
+            <div className="bg-white p-6 rounded shadow-lg w-full max-w-md">
 
               {/* CLOSE ICON */}
               <button
                 onClick={() => setEditTask(null)}
-                className="absolute top-3 right-3 text-gray-500 hover:text-red-500 text-xl font-bold"
+                className="float-right text-gray-500 hover:text-red-500 text-xl font-bold"
               >
-                ✕
+                ×
               </button>
 
-              <h3 className="text-2xl font-bold mb-6 text-blue-600">
+              <h3 className="text-xl font-bold mb-4 text-blue-600">
                 Edit Task
               </h3>
 
@@ -129,7 +129,7 @@ function TaskList() {
                 }}
               >
                 <input
-                  className="w-full p-3 border rounded-lg mb-4 focus:ring-2 focus:ring-blue-400"
+                  className="w-full p-2 border rounded mb-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
                   value={editTask.title}
                   onChange={(e) =>
                     setEditTask({ ...editTask, title: e.target.value })
@@ -138,7 +138,7 @@ function TaskList() {
                 />
 
                 <textarea
-                  className="w-full p-3 border rounded-lg mb-4 focus:ring-2 focus:ring-blue-400"
+                  className="w-full p-2 border rounded mb-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
                   value={editTask.description}
                   onChange={(e) =>
                     setEditTask({ ...editTask, description: e.target.value })
@@ -147,7 +147,7 @@ function TaskList() {
                 />
 
                 <select
-                  className="w-full p-3 border rounded-lg mb-6 focus:ring-2 focus:ring-blue-400"
+                  className="w-full p-2 border rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
                   value={editTask.status}
                   onChange={(e) =>
                     setEditTask({ ...editTask, status: e.target.value })
@@ -161,9 +161,9 @@ function TaskList() {
                 {/* ONLY SAVE BUTTON */}
                 <button
                   type="submit"
-                  className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition font-semibold"
+                  className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition font-semibold"
                 >
-                  Save 
+                  Save
                 </button>
               </form>
             </div>
@@ -172,46 +172,48 @@ function TaskList() {
 
         {/* TABLE */}
         <div className="overflow-x-auto">
-          <table className="w-full border rounded-xl shadow-md">
+          <table className="w-full border rounded shadow">
             <thead className="bg-blue-500 text-white">
               <tr>
-                <th className="py-4 px-6">Title</th>
-                <th className="py-4 px-6">Description</th>
-                <th className="py-4 px-6">Status</th>
-                <th className="py-4 px-6">Actions</th>
+                <th className="py-3 px-4">Title</th>
+                <th className="py-3 px-4">Description</th>
+                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4">Actions</th>
               </tr>
             </thead>
 
             <tbody>
               {tasks.map((task) => (
-                <tr key={task.id} className="border-b hover:bg-blue-50">
-                  <td className="py-4 px-6">{task.title}</td>
-                  <td className="py-4 px-6">{task.description}</td>
-                  <td className="py-4 px-6">
-                    <span className={`px-3 py-1 rounded-full ${getStatusColor(task.status)}`}>
+                <tr key={task.id} className="border-b hover:bg-gray-50">
+                  <td className="py-3 px-4">{task.title}</td>
+                  <td className="py-3 px-4">{task.description}</td>
+                  <td className="py-3 px-4">
+                    <span className={`px-2 py-1 rounded ${getStatusColor(task.status)}`}>
                       {task.status}
                     </span>
                   </td>
 
-                  <td className="py-4 px-6 flex gap-3 justify-center">
-                    <button
-                      onClick={() => setViewTask(task)}
-                      className="bg-indigo-500 text-white px-4 py-2 rounded-lg"
-                    >
-                      View
-                    </button>
-                    <button
-                      onClick={() => setEditTask(task)}
-                      className="bg-yellow-500 text-white px-4 py-2 rounded-lg"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => deleteTask(task.id)}
-                      className="bg-red-500 text-white px-4 py-2 rounded-lg"
-                    >
-                      Delete
-                    </button>
+                  <td className="py-3 px-4">
+                    <div className="flex gap-2 justify-center">
+                      <button
+                        onClick={() => setViewTask(task)}
+                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                      >
+                        View
+                      </button>
+                      <button
+                        onClick={() => setEditTask(task)}
+                        className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => deleteTask(task.id)}
+                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

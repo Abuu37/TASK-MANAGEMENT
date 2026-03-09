@@ -1,168 +1,191 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";     
-import { Formik, Form, Field, ErrorMessage } from "formik";
-import * as Yup from "yup";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
+import { toast } from 'react-toastify';
 
-// Validation schema with Yup
-const TaskSchema = Yup.object().shape({
-  title: Yup.string()
-    .min(3, "Title too short!")
-    .max(50, "Title too long!")
-    .required("Title is required"),
-  description: Yup.string()
-    .min(5, "Description too short!")
-    .max(500, "Description too long!")
-    .required("Description is required"),
-  status: Yup.string().oneOf(
-    ["Pending", "In Progress", "Completed"],
-    "Invalid status"
-  ),
-});
+interface TaskFormValues {
+  title: string;
+  description: string;
+  status: string;
+  priority: string;
+  due_date: string;
+}
 
-function TaskForm() {
-  const [loading, setLoading] = useState(false);
+const TaskForm: React.FC = () => {
   const navigate = useNavigate();
 
-  const handleSubmit = async (values: {
-    title: string;
-    description: string;
-    status: string;
-  }) => {
-    setLoading(true);
+  const validationSchema = Yup.object({
+    title: Yup.string()
+      .required('Title is required')
+      .min(3, 'Title must be at least 3 characters')
+      .max(100, 'Title must not exceed 100 characters'),
+    description: Yup.string()
+      .required('Description is required')
+      .min(10, 'Description must be at least 10 characters'),
+    status: Yup.string()
+      .required('Status is required')
+      .oneOf(['pending', 'in_progress', 'completed']),
+    priority: Yup.string()
+      .required('Priority is required')
+      .oneOf(['low', 'medium', 'high']),
+    due_date: Yup.date()
+      .required('Due date is required')
+      .min(new Date(), 'Due date must be in the future'),
+  });
 
-    // Show spinner for 2 seconds
-    setTimeout(async () => {
-      try {
-        const token = localStorage.getItem("accessToken");
-        const response = await fetch("http://localhost:8000/api/tasks/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-          },
-          body: JSON.stringify(values),
-        });
+  const initialValues: TaskFormValues = {
+    title: '',
+    description: '',
+    status: 'pending',
+    priority: 'medium',
+    due_date: '',
+  };
 
-        if (!response.ok) {
-          toast.error("Failed to create task ❌", { position: "top-right" });
-          setLoading(false);
-          return;
-        }
-
-        toast.success("Task added successfully! ✅", { position: "top-right" });
-
-        // Redirect after 1 second
-        setTimeout(() => {
-          navigate("/tasks");
-        }, 1000);
-
-      } catch (error) {
-        toast.error("Network error ❌", { position: "top-right" });
-        setLoading(false);
+  const handleSubmit = async (values: TaskFormValues, { setSubmitting }: any) => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        toast.error('Please login first');
+        navigate('/login');
+        return;
       }
-    }, 2000);
+
+      const response = await fetch('http://localhost:8000/api/tasks/', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(values),
+      });
+
+      if (response.ok) {
+        toast.success('Task created successfully!');
+        navigate('/tasks');
+      } else {
+        const data = await response.json();
+        toast.error(data.error || 'Failed to create task');
+      }
+    } catch (error) {
+      toast.error('An error occurred while creating the task');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <Formik
-        initialValues={{ title: "", description: "", status: "Pending" }}
-        validationSchema={TaskSchema}
-        onSubmit={handleSubmit}
-      >
-        {({ isSubmitting, isValid, dirty }) => (
-          <Form className="bg-white w-full max-w-md p-8 rounded-2xl shadow-lg">
-            <h2 className="text-3xl font-bold text-center mb-6 text-blue-600">
-              📝 Create Task
-            </h2>
+    <div className="container mx-auto px-4 py-8 max-w-2xl">
+      <div className="bg-white rounded-lg shadow-lg p-8">
+        <h1 className="text-3xl font-bold text-gray-800 mb-6">Create New Task</h1>
+        
+        <Formik
+          initialValues={initialValues}
+          validationSchema={validationSchema}
+          onSubmit={handleSubmit}
+        >
+          {({ isSubmitting }) => (
+            <Form className="space-y-6">
+              <div>
+                <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+                  Title
+                </label>
+                <Field
+                  type="text"
+                  id="title"
+                  name="title"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter task title"
+                />
+                <ErrorMessage name="title" component="div" className="text-red-600 text-sm mt-1" />
+              </div>
 
-            {/* Title */}
-            <div className="mb-4">
-              <label className="block font-semibold text-gray-700 mb-1">
-                Task Title
-              </label>
-              <Field
-                type="text"
-                name="title"
-                placeholder="Enter task title"
-                className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-              />
-              <ErrorMessage
-                name="title"
-                component="div"
-                className="text-red-500 text-sm mt-1"
-              />
-            </div>
+              <div>
+                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                  Description
+                </label>
+                <Field
+                  as="textarea"
+                  id="description"
+                  name="description"
+                  rows={5}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter task description"
+                />
+                <ErrorMessage name="description" component="div" className="text-red-600 text-sm mt-1" />
+              </div>
 
-            {/* Description */}
-            <div className="mb-4">
-              <label className="block font-semibold text-gray-700 mb-1">
-                Description
-              </label>
-              <Field
-                as="textarea"
-                name="description"
-                placeholder="Enter task description"
-                rows={4}
-                className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-              />
-              <ErrorMessage
-                name="description"
-                component="div"
-                className="text-red-500 text-sm mt-1"
-              />
-            </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
+                    Status
+                  </label>
+                  <Field
+                    as="select"
+                    id="status"
+                    name="status"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                  </Field>
+                  <ErrorMessage name="status" component="div" className="text-red-600 text-sm mt-1" />
+                </div>
 
-            {/* Status */}
-            <div className="mb-6">
-              <label className="block font-semibold text-gray-700 mb-1">
-                Status
-              </label>
-              <Field
-                as="select"
-                name="status"
-                className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-              >
-                <option value="Pending">Pending</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Completed">Completed</option>
-              </Field>
-              <ErrorMessage
-                name="status"
-                component="div"
-                className="text-red-500 text-sm mt-1"
-              />
-            </div>
+                <div>
+                  <label htmlFor="priority" className="block text-sm font-medium text-gray-700 mb-1">
+                    Priority
+                  </label>
+                  <Field
+                    as="select"
+                    id="priority"
+                    name="priority"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                  </Field>
+                  <ErrorMessage name="priority" component="div" className="text-red-600 text-sm mt-1" />
+                </div>
+              </div>
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isSubmitting || !isValid || !dirty || loading}
-              className={`w-full py-3 rounded-lg font-semibold transition duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed
-                ${
-                  loading
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700 text-white"
-                }`}
-            >
-              {loading ? (
-                <>
-                  <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                  Loading...
-                </>
-              ) : (
-                "➕ Add Task"
-              )}
-            </button>
-          </Form>
-        )}
-      </Formik>
+              <div>
+                <label htmlFor="due_date" className="block text-sm font-medium text-gray-700 mb-1">
+                  Due Date
+                </label>
+                <Field
+                  type="date"
+                  id="due_date"
+                  name="due_date"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <ErrorMessage name="due_date" component="div" className="text-red-600 text-sm mt-1" />
+              </div>
 
-      <ToastContainer />
+              <div className="flex gap-4 pt-4">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-200 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? 'Creating...' : 'Create Task'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate('/tasks')}
+                  className="flex-1 bg-gray-600 text-white py-3 rounded-lg hover:bg-gray-700 transition duration-200 font-semibold"
+                >
+                  Cancel
+                </button>
+              </div>
+            </Form>
+          )}
+        </Formik>
+      </div>
     </div>
   );
-}
+};
 
 export default TaskForm;
